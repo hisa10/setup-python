@@ -1,0 +1,28 @@
+---
+- hosts: pyhosts
+  become: true
+  tasks:
+    - name: Download src
+      get_url:
+        url: 'https://www.python.org/ftp/python/{{ py_vers }}/Python-{{ py_vers }}.tgz'
+        dest: /tmp/
+    - name: Unarchive src
+      unarchive:
+        src: '/tmp/Python-{{ py_vers }}.tgz'
+        dest: '{{ srcdir }}'
+    - name: Configure
+      shell: ./configure --prefix={{ destdir }}/python-{{ py_vers }}
+      args:
+        chdir: '{{ srcdir }}/Python-{{ py_vers }}'
+    - name: Make
+      shell: make -j2
+      args:
+        chdir: '{{ srcdir }}/Python-{{ py_vers }}'
+    - name: Install
+      shell: make install
+      args:
+        chdir: '{{ srcdir }}/Python-{{ py_vers }}'
+    - name: Cleanup
+      file:
+        path: '/tmp/Python-{{ py_vers }}.tgz'
+        state: absent
